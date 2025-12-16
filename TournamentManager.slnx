@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="TournamentManager.App/TournamentManager.App.csproj" />
+  <Project Path="TournamentManager.Models/TournamentManager.Models.csproj" />
+  <Project Path="TournamentManager.Services/TournamentManager.Services.csproj" />
+</Solution>

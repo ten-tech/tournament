@@ -1,0 +1,26 @@
+## Fichiers de build
+bin/
+obj/
+
+## Visual Studio
+.vs/
+
+## Fichiers utilisateur
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Packages NuGet
+*.nupkg
+*.snupkg
+packages/
+
+## Fichiers compilés
+*.dll
+*.exe
+*.pdb
+
+## Projets locaux
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*   
