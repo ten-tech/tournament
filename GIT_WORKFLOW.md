@@ -10,8 +10,10 @@ Guide complet de la stratégie de branches et des workflows Git pour le projet.
 2. [Stratégie de branches](#stratégie-de-branches)
 3. [Workflow quotidien](#workflow-quotidien)
 4. [Gestion des versions](#gestion-des-versions)
-5. [Conventions de commits](#conventions-de-commits)
-6. [Commandes utiles](#commandes-utiles)
+5. [Pull Requests](#pull-requests)
+6. [Protection de branches](#protection-de-branches)
+7. [Conventions de commits](#conventions-de-commits)
+8. [Commandes utiles](#commandes-utiles)
 
 ---
 
@@ -52,6 +54,7 @@ feature/* (fonctionnalités individuelles)
 - ❌ **Pas de code expérimental**
 
 **Commits typiques sur main :**
+
 - Merges depuis `dev` après validation complète
 - Hotfixes critiques (avec tag patch : v1.0.1)
 
@@ -65,6 +68,7 @@ feature/* (fonctionnalités individuelles)
 - ⚠️ **Testé avant merge vers main**
 
 **Commits typiques sur dev :**
+
 - Nouvelles fonctionnalités
 - Refactoring
 - Améliorations
@@ -79,6 +83,7 @@ feature/* (fonctionnalités individuelles)
 - ✅ **Supprimée après merge**
 
 **Exemples de branches feature :**
+
 ```
 feature/add-athlete-module
 feature/improve-scoring-algorithm
@@ -262,6 +267,378 @@ git push origin --delete v1.0.0
 
 ---
 
+## 🔀 Pull Requests
+
+### Qu'est-ce qu'une Pull Request (PR) ?
+
+Une **Pull Request** est une demande de merge d'une branche vers une autre, avec :
+- **Review de code** : Relecture par l'équipe avant merge
+- **Discussion** : Commentaires et suggestions
+- **Validation automatique** : Tests CI/CD
+- **Traçabilité** : Historique des changements
+
+### Créer une Pull Request (dev → main)
+
+#### Méthode 1 : Via l'interface web GitHub (Recommandé)
+
+1. **Pousser votre branche dev**
+   ```bash
+   git checkout dev
+   git push origin dev
+   ```
+
+2. **Aller sur GitHub**
+   - URL : `https://github.com/ten-tech/tournament`
+   - Vous verrez un message : "dev had recent pushes"
+   - Cliquer sur **"Compare & pull request"**
+
+3. **Configurer la Pull Request**
+   - **Base** : `main` (branche de destination)
+   - **Compare** : `dev` (branche source)
+   - **Titre** : `Release v1.1.0 - Nouvelles fonctionnalités`
+   - **Description** :
+     ```markdown
+     ## 🚀 Release v1.1.0
+
+     ### ✨ Nouvelles fonctionnalités
+     - Ajout du module de gestion des athlètes
+     - Amélioration du système de scoring
+     - Interface utilisateur optimisée
+
+     ### 🐛 Corrections
+     - Correction du calcul des médailles
+     - Fix des conflits de calendrier
+
+     ### 📝 Documentation
+     - Mise à jour du README
+     - Ajout du workflow Git
+
+     ### ✅ Checklist
+     - [x] Code compilé sans erreurs
+     - [x] Tests effectués
+     - [x] Documentation mise à jour
+     - [x] Prêt pour production
+     ```
+
+4. **Options importantes**
+   - ☑️ **Allow edits from maintainers**
+   - ☑️ **Delete branch after merge** (pour feature branches)
+
+5. **Créer la PR**
+   - Cliquer sur **"Create pull request"**
+
+#### Méthode 2 : Via GitHub CLI (si installé)
+
+```bash
+# Installer GitHub CLI (si nécessaire)
+# Ubuntu/Debian:
+sudo apt update
+sudo apt install gh
+
+# Authentification
+gh auth login
+
+# Créer une PR
+git checkout dev
+gh pr create --base main --title "Release v1.1.0" --body "Description de la release"
+
+# Ou de manière interactive
+gh pr create
+```
+
+### Workflow de Pull Request
+
+```
+1. Développement
+   └─► Commits sur dev ou feature branch
+
+2. Push
+   └─► git push origin dev
+
+3. Créer PR sur GitHub
+   └─► dev → main
+
+4. Code Review
+   └─► Équipe review le code
+   └─► Commentaires et suggestions
+
+5. Corrections si nécessaire
+   └─► Nouveaux commits sur dev
+   └─► PR mise à jour automatiquement
+
+6. Approbation
+   └─► Reviews approuvées
+   └─► CI/CD checks passés
+
+7. Merge
+   └─► Merge PR vers main
+   └─► Créer tag de version
+
+8. Déploiement
+   └─► Code en production
+```
+
+### Types de merge
+
+Lors du merge de la PR, 3 options :
+
+1. **Merge commit** (Recommandé pour dev→main)
+   - Crée un commit de merge
+   - Préserve tout l'historique
+   - `git merge --no-ff`
+
+2. **Squash and merge**
+   - Combine tous les commits en un seul
+   - Historique propre sur main
+   - Bon pour feature branches
+
+3. **Rebase and merge**
+   - Applique les commits un par un
+   - Historique linéaire
+   - Attention aux conflits
+
+### Template de Pull Request
+
+Créez un fichier `.github/PULL_REQUEST_TEMPLATE.md` :
+
+```markdown
+## 📝 Description
+
+Brève description des changements...
+
+## 🎯 Type de changement
+
+- [ ] 🐛 Bug fix (correction non-breaking)
+- [ ] ✨ Nouvelle fonctionnalité (non-breaking)
+- [ ] 💥 Breaking change (modification incompatible)
+- [ ] 📝 Documentation
+- [ ] 🎨 Style/Refactoring
+
+## 🧪 Tests effectués
+
+- [ ] Tests manuels
+- [ ] Tests unitaires ajoutés/modifiés
+- [ ] Application testée localement
+
+## 📋 Checklist
+
+- [ ] Code compilé sans erreurs ni warnings
+- [ ] Code formaté (`make format`)
+- [ ] Documentation mise à jour
+- [ ] Commits suivent les conventions
+- [ ] Prêt pour review
+
+## 📸 Captures d'écran (si applicable)
+
+...
+
+## 💬 Notes pour les reviewers
+
+...
+```
+
+---
+
+## 🔒 Protection de branches
+
+### Pourquoi protéger les branches ?
+
+La protection de branches **empêche** :
+- ❌ Push direct sur main/dev
+- ❌ Force push destructif (`git push --force`)
+- ❌ Suppression accidentelle de la branche
+- ❌ Merge sans review
+- ❌ Merge avec CI/CD en échec
+
+### Configurer la protection sur GitHub
+
+#### 1. Accéder aux paramètres
+
+```
+GitHub → Repository "tournament"
+  → Settings (⚙️)
+    → Branches (dans le menu gauche)
+      → Add branch protection rule
+```
+
+#### 2. Protéger la branche `main`
+
+**Branch name pattern** : `main`
+
+**Cocher les options suivantes** :
+
+✅ **Require a pull request before merging**
+   - ✅ Require approvals : `1` (ou plus)
+   - ✅ Dismiss stale pull request approvals when new commits are pushed
+   - ✅ Require review from Code Owners (optionnel)
+
+✅ **Require status checks to pass before merging**
+   - ✅ Require branches to be up to date before merging
+   - Ajouter les checks CI/CD si configurés
+
+✅ **Require conversation resolution before merging**
+   - Force la résolution de tous les commentaires
+
+✅ **Require signed commits** (Optionnel mais recommandé)
+   - Nécessite GPG signing
+
+✅ **Require linear history**
+   - Évite les merges complexes
+   - Force rebase ou squash
+
+✅ **Do not allow bypassing the above settings**
+   - Même les admins doivent suivre les règles
+
+✅ **Restrict who can push to matching branches**
+   - Seulement certains utilisateurs/équipes
+   - Ou : Personne (seulement via PR)
+
+**CRUCIAL** :
+✅ **Block force pushes** ← EMPÊCHE `git push --force`
+✅ **Do not allow deletions** ← EMPÊCHE suppression de la branche
+
+#### 3. Protéger la branche `dev`
+
+**Branch name pattern** : `dev`
+
+**Options recommandées** (moins strictes que main) :
+
+✅ **Require a pull request before merging**
+   - ✅ Require approvals : `1`
+
+✅ **Block force pushes**
+✅ **Do not allow deletions**
+
+☐ Require status checks (optionnel)
+☐ Require linear history (optionnel)
+
+#### 4. Protection des feature branches
+
+**Branch name pattern** : `feature/*`
+
+**Options minimales** :
+
+✅ **Block force pushes**
+☐ Do not allow deletions (on peut supprimer après merge)
+
+### Workflow avec branches protégées
+
+Avec protection activée sur `main` :
+
+```bash
+# ❌ CECI EST BLOQUÉ
+git checkout main
+git commit -m "fix"
+git push origin main
+# Error: protected branch hook declined
+
+# ✅ BONNE MÉTHODE
+git checkout dev
+git commit -m "fix: correction"
+git push origin dev
+
+# Puis créer une PR : dev → main
+```
+
+### Force push - Quand et comment ?
+
+**⚠️ ATTENTION : Force push est DANGEREUX**
+
+Ne jamais sur `main` ou `dev` !
+
+Cas d'usage valides (seulement sur feature branches personnelles) :
+
+```bash
+# Réécrire l'historique local
+git rebase -i HEAD~3
+
+# Force push (avec --force-with-lease pour sécurité)
+git push --force-with-lease origin feature/ma-branche
+
+# JAMAIS sur main ou dev !
+# ❌ git push --force origin main  → BLOQUÉ par protection
+```
+
+### Vérifier la protection de branche
+
+Via GitHub CLI :
+
+```bash
+# Installer gh si nécessaire
+gh auth login
+
+# Voir les règles de protection
+gh api repos/ten-tech/tournament/branches/main/protection
+
+# Lister toutes les branches protégées
+gh api repos/ten-tech/tournament/branches --jq '.[] | select(.protected) | .name'
+```
+
+Via l'interface web :
+
+```
+Settings → Branches → Branch protection rules
+```
+
+### Supprimer temporairement la protection (Admin uniquement)
+
+**⚠️ À faire UNIQUEMENT en cas d'urgence absolue**
+
+1. Settings → Branches
+2. Trouver la règle (ex: main)
+3. Cliquer sur "Edit" ou "Delete"
+4. Faire l'opération urgente
+5. **RÉTABLIR IMMÉDIATEMENT LA PROTECTION**
+
+### Bonnes pratiques
+
+✅ **À FAIRE** :
+- Protéger `main` ET `dev`
+- Exiger des reviews (au moins 1)
+- Bloquer force push
+- Bloquer deletions
+- Utiliser des PR pour tout merge vers main
+- Configurer CI/CD checks
+- Documenter les règles dans ce fichier
+
+❌ **À ÉVITER** :
+- Désactiver temporairement la protection "juste une fois"
+- Bypasser les règles même en tant qu'admin
+- Permettre force push sur main/dev
+- Merger sans review
+- Ignorer les checks CI/CD
+
+### Template de règles de protection
+
+Voici les règles recommandées pour ce projet :
+
+**Pour `main` (Production)** :
+```
+✅ Require PR with 1+ approval
+✅ Require status checks
+✅ Require conversation resolution
+✅ Require linear history
+✅ Block force pushes
+✅ Do not allow deletions
+✅ Do not allow bypass
+```
+
+**Pour `dev` (Développement)** :
+```
+✅ Require PR with 1 approval
+✅ Block force pushes
+✅ Do not allow deletions
+☐ Status checks (optionnel)
+```
+
+**Pour `feature/*` (Features)** :
+```
+✅ Block force pushes
+☐ Deletions autorisées après merge
+```
+
+---
+
 ## 📝 Conventions de commits
 
 ### Format standard
@@ -276,16 +653,16 @@ git push origin --delete v1.0.0
 
 ### Types de commits
 
-| Type | Description | Exemple |
-|------|-------------|---------|
-| `feat` | Nouvelle fonctionnalité | `feat: ajout du module athlètes` |
-| `fix` | Correction de bug | `fix: correction du calcul des médailles` |
-| `docs` | Documentation uniquement | `docs: mise à jour du README` |
-| `style` | Formatage, indentation | `style: formatage du code avec dotnet format` |
-| `refactor` | Refactoring sans changement de fonctionnalité | `refactor: simplification de ScoringService` |
-| `test` | Ajout ou correction de tests | `test: ajout de tests pour CompetitionService` |
-| `chore` | Tâches de maintenance | `chore: mise à jour des dépendances` |
-| `perf` | Amélioration de performance | `perf: optimisation du tri des médailles` |
+| Type       | Description                                   | Exemple                                        |
+| ---------- | --------------------------------------------- | ---------------------------------------------- |
+| `feat`     | Nouvelle fonctionnalité                       | `feat: ajout du module athlètes`               |
+| `fix`      | Correction de bug                             | `fix: correction du calcul des médailles`      |
+| `docs`     | Documentation uniquement                      | `docs: mise à jour du README`                  |
+| `style`    | Formatage, indentation                        | `style: formatage du code avec dotnet format`  |
+| `refactor` | Refactoring sans changement de fonctionnalité | `refactor: simplification de ScoringService`   |
+| `test`     | Ajout ou correction de tests                  | `test: ajout de tests pour CompetitionService` |
+| `chore`    | Tâches de maintenance                         | `chore: mise à jour des dépendances`           |
+| `perf`     | Amélioration de performance                   | `perf: optimisation du tri des médailles`      |
 
 ### Exemples de bons commits
 
@@ -425,9 +802,9 @@ git stash clear
 ## 📊 Workflow visuel
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     WORKFLOW COMPLET                        │
-└─────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────
+                      WORKFLOW COMPLET
+└───────────────────────────────────────────────────────────
 
 main (production)
   │
