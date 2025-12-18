@@ -74,6 +74,7 @@ help:
 	@echo ""
 	@echo "$(COLOR_SUCCESS)📚 DOCUMENTATION$(COLOR_RESET)"
 	@echo "  make readme               - Ouvrir le README"
+	@echo "  make git-workflow         - Ouvrir le guide Git workflow"
 	@echo ""
 
 # ───────────────────────────────────────────────────────────────────────────
@@ -308,6 +309,12 @@ endif
 .PHONY: readme
 readme:
 	@cat README.md | less || more README.md
+
+# Ouvre le guide du workflow Git
+# Logique métier : Accès rapide à la stratégie de branches et conventions
+.PHONY: git-workflow
+git-workflow:
+	@cat GIT_WORKFLOW.md | less || more GIT_WORKFLOW.md
 
 # ───────────────────────────────────────────────────────────────────────────
 # RACCOURCIS PRATIQUES

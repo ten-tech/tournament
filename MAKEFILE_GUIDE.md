@@ -452,6 +452,30 @@ make readme
 
 ---
 
+#### `make git-workflow`
+**Description** : Affiche le guide du workflow Git dans le terminal.
+
+**Quand l'utiliser** :
+- Pour consulter la stratégie de branches (main/dev)
+- Pour voir les conventions de commits
+- Pour apprendre à créer des feature branches
+- Pour comprendre le workflow de release
+
+**Exemple** :
+```bash
+make git-workflow
+```
+
+**Contenu du guide** :
+- Stratégie de branchement (main = prod, dev = développement)
+- Workflow quotidien (feature branches)
+- Gestion des versions et tags
+- Conventions de commits (feat, fix, docs, etc.)
+- Commandes Git utiles
+- Résolution de problèmes courants
+
+---
+
 ## 🎯 Workflows Recommandés
 
 ### Workflow de développement quotidien
